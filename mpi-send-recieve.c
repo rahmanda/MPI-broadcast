@@ -9,13 +9,16 @@
 *	@param buffer, message count, MPI datatype, id sender, MPI Commworld
 */
 int bcast(void *buffer, int count, MPI_Datatype datatype, int root, MPI_Comm comm) {
-	int i, id, size;
+	int i, id, size, j;
+	// int n = sizeof(buffer) / sizeof(int);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
 	MPI_Comm_rank(MPI_COMM_WORLD, &id);
 	if(id == root) {
 		for(i = 0; i < size; i++) {
 			if(i != root) {
-				MPI_Send(buffer, count, datatype, i, 0, comm);
+				// for(j = 0; j < n; j++){
+					MPI_Send(buffer, count, datatype, i, 0, comm);
+				// }
 			}
 		}
 	} else {
@@ -27,7 +30,7 @@ int bcast(void *buffer, int count, MPI_Datatype datatype, int root, MPI_Comm com
 
 int main(int argc, char **argv)
 {
-	int size, id, i, *x;
+	int size, id, i, x[3] = {};
 
 	MPI_Init(&argc, &argv);
 
@@ -37,13 +40,12 @@ int main(int argc, char **argv)
 	// printf("before P[%d] x = %d\n", id, x);
 	// fflush(stdout);
 	if(id == 0) {
-		int data[5] = {1, 2, 3};
-		x = data;
+		x[0] = 1; x[1] = 2; x[2] = 3;
 	}
 
-	bcast(&x, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	bcast(x, 3, MPI_INT, 0, MPI_COMM_WORLD);
 
-	printf("after P[%d] x = %d\n", id, x);
+	printf("after P[%d] x[0] = %d, x[1] = %d, x[2] = %d \n", id, x[0], x[1], x[2]);
 
 	MPI_Finalize();
 	return 0;
